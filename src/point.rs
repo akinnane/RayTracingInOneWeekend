@@ -30,6 +30,10 @@ impl Point {
     pub fn unit_vector(self) -> Point {
         self / self.length()
     }
+
+    pub fn dot(&self, other: &Point) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
 }
 
 impl Div<f64> for Point {
@@ -74,10 +78,23 @@ impl Neg for Point {
     }
 }
 
-impl Sub for Point {
+impl Sub<Point> for Point {
     type Output = Point;
 
-    fn sub(self, other: Point) -> Point {
+    fn sub(self, other: Point) -> Self::Output {
+        Point {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+
+impl Sub<&Point> for Point {
+    type Output = Point;
+
+    fn sub(self, other: &Point) -> Self::Output {
         Point {
             x: self.x - other.x,
             y: self.y - other.y,

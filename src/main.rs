@@ -8,7 +8,19 @@ use crate::point::Point;
 mod ray;
 use crate::ray::Ray;
 
-fn ray_color(ray: Ray) -> Pixel {
+fn hit_sphere(center: &Point, radius: f64, ray: &Ray) -> bool {
+    let oc = ray.origin - center;
+    let a = ray.direction.dot(&ray.direction);
+    let b = oc.dot(&ray.direction) * 2.0;
+    let c = oc.dot(&oc) - radius* radius;
+    let discriminant = b*b - 4.0 * a *c;
+    discriminant > 0.0
+}
+
+fn ray_color(ray: &Ray) -> Pixel {
+    if hit_sphere(&Point{x:0.0,y:0.0,z:-1.0}, 0.5, ray) {
+        return Pixel{r:1.0, g:0.0, b:0.0}
+    }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
     (Pixel{r:1.0, g:1.0, b:1.0} * (1.0-t) )+ (Pixel{r:0.5, g:0.7, b:1.0} * t)
@@ -51,7 +63,7 @@ fn main() {
             let v = h as f64 / (height -1) as f64;
             let ray = Ray{origin, direction: lower_left_corner + (horizontal*u) + (vertical*v) - origin};
             let p = image.mut_pixel(w, h);
-            *p = ray_color(ray);
+            *p = ray_color(&ray);
         }
     }
 
