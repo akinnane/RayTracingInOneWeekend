@@ -1,5 +1,8 @@
 use crate::Pixel;
 use std::fmt;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufWriter;
 
 #[derive(Default)]
 pub struct PPM {
@@ -23,6 +26,11 @@ impl PPM {
 
     pub fn pixel(&self, width: usize, height: usize) -> &Pixel {
         self.pixels.get(height * self.width + width).unwrap()
+    }
+
+    pub fn write(&self, filename: &str) -> Result<usize, std::io::Error> {
+        let mut f = File::create(filename)?;
+        f.write(self.to_string().as_bytes())
     }
 }
 

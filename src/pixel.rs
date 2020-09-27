@@ -1,5 +1,7 @@
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
+
+use crate::point::Point;
 #[derive(Default, Clone)]
 pub struct Pixel {
     pub r: f64,
@@ -8,6 +10,9 @@ pub struct Pixel {
 }
 
 impl Pixel {
+    pub fn new(r: f64, g: f64, b: f64) -> Self {
+        Self { r, g, b }
+    }
     pub fn r(self) -> f64 {
         self.r
     }
@@ -38,6 +43,17 @@ impl Add for Pixel {
             r: self.r + rhs.r,
             g: self.g + rhs.g,
             b: self.b + rhs.b,
+        }
+    }
+}
+
+impl Add<Point> for Pixel {
+    type Output = Self;
+    fn add(self, rhs: Point) -> Self {
+        Pixel {
+            r: self.r + rhs.x,
+            g: self.g + rhs.y,
+            b: self.b + rhs.z,
         }
     }
 }

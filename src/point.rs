@@ -9,6 +9,9 @@ pub struct Point {
 }
 
 impl Point {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Self { x, y, z }
+    }
     pub fn x(&self) -> f64 {
         self.x
     }
@@ -42,7 +45,6 @@ impl Div<f64> for Point {
         self * (1.0 / t)
     }
 }
-
 
 impl Mul<f64> for Point {
     type Output = Self;
@@ -90,7 +92,6 @@ impl Sub<Point> for Point {
     }
 }
 
-
 impl Sub<&Point> for Point {
     type Output = Point;
 
@@ -102,7 +103,6 @@ impl Sub<&Point> for Point {
         }
     }
 }
-
 
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
