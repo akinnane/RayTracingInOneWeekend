@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::ray::Ray;
+//use crate::ray::Ray;
 
 pub struct Camera {
     pub origin: Point,
@@ -47,11 +47,11 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(self, u: f64, v: f64) -> Ray {
-        Ray {
-            origin: self.origin,
-            direction: self.lower_left_corner + self.horizontal * u + self.vertical * v
-                - self.origin,
-        }
-    }
+    // pub fn get_ray(self, u: f64, v: f64) -> Ray {
+    //     Ray {
+    //         origin: self.origin,
+    //         direction: self.lower_left_corner + self.horizontal * u + self.vertical * v
+    //             - self.origin,
+    //     }
+    // }
 }

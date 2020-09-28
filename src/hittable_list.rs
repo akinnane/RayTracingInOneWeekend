@@ -4,21 +4,21 @@ use crate::ray::Ray;
 
 #[derive(Default)]
 pub struct HittableList {
-    pub objects: Vec<Box<dyn Hittable>>,
+    pub objects: Vec<Box<dyn Hittable + Send + Sync>>,
 }
 
 impl HittableList {
-    pub fn new(object: Box<dyn Hittable>) -> Self {
-        Self {
-            objects: vec![object],
-        }
-    }
+    // pub fn new(object: Box<dyn Hittable + Send + Sync>) -> Self {
+    //     Self {
+    //         objects: vec![object],
+    //     }
+    // }
 
-    pub fn clear(&mut self) {
-        self.objects.clear();
-    }
+    // pub fn clear(&mut self) {
+    //     self.objects.clear();
+    // }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable + Send + Sync>) {
         self.objects.push(object);
     }
 }
@@ -36,6 +36,6 @@ impl Hittable for HittableList {
                 *rec = temp_record.clone();
             }
         }
-        return hit_anything;
+        hit_anything
     }
 }

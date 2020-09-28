@@ -1,8 +1,8 @@
 use std::fmt;
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::point::Point;
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct Pixel {
     pub r: f64,
     pub g: f64,
@@ -21,6 +21,22 @@ impl Pixel {
     }
     pub fn b(self) -> f64 {
         self.b
+    }
+
+    pub fn r_u8(&self) -> u8 {
+        Pixel::x_u8(self.r)
+    }
+
+    pub fn g_u8(&self) -> u8 {
+        Pixel::x_u8(self.g)
+    }
+    pub fn b_u8(&self) -> u8 {
+        Pixel::x_u8(self.b)
+    }
+
+    fn x_u8(x: f64) -> u8 {
+        const LESS_THAN_ONE: f64 = 1.0 - f64::MIN;
+        (255.999 * x.clamp(0.0, LESS_THAN_ONE)) as u8
     }
 }
 
@@ -80,13 +96,10 @@ impl Add<Point> for Pixel {
 
 impl fmt::Display for Pixel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const LESS_THAN_ONE: f64 = 1.0 - f64::MIN;
-        write!(
-            f,
-            "{} {} {}",
-            (255.999 * self.r.clamp(0.0, LESS_THAN_ONE)) as u8,
-            (255.999 * self.g.clamp(0.0, LESS_THAN_ONE)) as u8,
-            (255.999 * self.b.clamp(0.0, LESS_THAN_ONE)) as u8
-        )
+        write!(f, "{} {} {}", self.r_u8(), self.g_u8(), self.b_u8())
     }
 }
+
+// pub struct PixelSlice<'a> {
+//     pub slice: &'a [u8; 3]
+// }

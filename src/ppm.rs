@@ -1,8 +1,8 @@
 use crate::Pixel;
+use show_image::{ImageData, ImageInfo};
 use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::BufWriter;
 
 #[derive(Default)]
 pub struct PPM {
@@ -43,5 +43,21 @@ impl fmt::Display for PPM {
             }
         }
         write!(f, "")
+    }
+}
+
+impl ImageData for &PPM {
+    fn info(&self) -> Result<ImageInfo, String> {
+        Ok(ImageInfo::rgb8(self.width, self.height))
+    }
+
+    fn data(self) -> Box<[u8]> {
+        let mut v: Vec<u8> = vec![];
+        for pixel in self.pixels.iter().rev() {
+            v.push(pixel.r_u8());
+            v.push(pixel.g_u8());
+            v.push(pixel.b_u8());
+        }
+        v.into_boxed_slice()
     }
 }
