@@ -1,3 +1,4 @@
+#![feature(clamp)]
 mod pixel;
 use hittable::Hittable;
 
@@ -18,6 +19,11 @@ use crate::hittable_list::HittableList;
 
 mod sphere;
 use crate::sphere::Sphere;
+
+mod camera;
+use crate::camera::Camera;
+
+use rand::Rng;
 
 fn hit_sphere(center: &Point, radius: f64, ray: &Ray) -> f64 {
     let oc = ray.origin - center;
@@ -56,54 +62,40 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let width = 3840;
     let height = (width as f64 / aspect_ratio) as usize;
+    let samples_per_pixel = 100;
+    let mut rng = rand::thread_rng();
 
     // World
     let mut world = HittableList::default();
     world.add(Box::new(Sphere::new(Point::new(0.0, 0.0, -1.0), 0.5)));
     world.add(Box::new(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0)));
 
-    // Camera
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
+    let camera = Camera::new();
 
-    let origin = Point {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-    };
-    let horizontal = Point {
-        x: viewport_width,
-        y: 0.0,
-        z: 0.0,
-    };
-    let vertical = Point {
-        x: 0.0,
-        y: viewport_height,
-        z: 0.0,
-    };
-    let lower_left_corner = origin
-        - horizontal / 2.0
-        - vertical / 2.0
-        - Point {
-            x: 0.0,
-            y: 0.0,
-            z: focal_length,
-        };
-    dbg!(&lower_left_corner);
     let mut image = PPM::new(width, height);
 
     for h in 0..height - 1 {
         eprintln!("\rScanlines remaining: {}", h);
         for w in 0..width {
-            let u = w as f64 / (width - 1) as f64;
-            let v = h as f64 / (height - 1) as f64;
-            let ray = Ray {
-                origin,
-                direction: lower_left_corner + (horizontal * u) + (vertical * v) - origin,
-            };
             let p = image.mut_pixel(w, h);
-            *p = ray_color(&ray, &world);
+
+            for sample in 0..=samples_per_pixel {
+                //                let u = w as f64 / (width  - 1) as f64;
+                //let v = h as f64 / (height - 1) as f64;
+
+                let u = (w as f64 + rng.gen_range(0.0, 1.0)) / (width - 1) as f64;
+                let v = (h as f64 + rng.gen_range(0.0, 1.0)) / (height - 1) as f64;
+
+                let ray = Ray {
+                    origin: camera.origin,
+                    direction: camera.lower_left_corner
+                        + (camera.horizontal * u)
+                        + (camera.vertical * v)
+                        - camera.origin,
+                };
+                *p += ray_color(&ray, &world);
+            }
+            *p *= 1.0 / samples_per_pixel as f64;
         }
     }
 

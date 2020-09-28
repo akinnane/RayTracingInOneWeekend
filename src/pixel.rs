@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub};
 
 use crate::point::Point;
 #[derive(Default, Clone)]
@@ -36,6 +36,16 @@ impl Mul<f64> for Pixel {
     }
 }
 
+impl MulAssign<f64> for Pixel {
+    fn mul_assign(&mut self, t: f64) {
+        *self = Self {
+            r: self.r * t,
+            g: self.g * t,
+            b: self.b * t,
+        };
+    }
+}
+
 impl Add for Pixel {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
@@ -44,6 +54,16 @@ impl Add for Pixel {
             g: self.g + rhs.g,
             b: self.b + rhs.b,
         }
+    }
+}
+
+impl AddAssign for Pixel {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = Self {
+            r: self.r + rhs.r,
+            g: self.g + rhs.g,
+            b: self.b + rhs.b,
+        };
     }
 }
 
@@ -60,12 +80,13 @@ impl Add<Point> for Pixel {
 
 impl fmt::Display for Pixel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        const LESS_THAN_ONE: f64 = 1.0 - f64::MIN;
         write!(
             f,
             "{} {} {}",
-            (255.999 * self.r) as u8,
-            (255.999 * self.g) as u8,
-            (255.999 * self.b) as u8
+            (255.999 * self.r.clamp(0.0, LESS_THAN_ONE)) as u8,
+            (255.999 * self.g.clamp(0.0, LESS_THAN_ONE)) as u8,
+            (255.999 * self.b.clamp(0.0, LESS_THAN_ONE)) as u8
         )
     }
 }
