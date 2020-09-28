@@ -27,25 +27,23 @@ use crate::camera::Camera;
 
 use rand::Rng;
 use rayon::prelude::*;
-use show_image::make_window;
+use show_image::{make_window, KeyCode};
 
-// fn hit_sphere(center: &Point, radius: f64, ray: &Ray) -> f64 {
-//     let oc = ray.origin - center;
-//     let a = ray.direction.length_squared();
-//     let half_b = oc.dot(&ray.direction);
-//     let c = oc.length_squared() - radius * radius;
-//     let discriminant = half_b * half_b - a * c;
-//     if discriminant < 0.0 {
-//         -1.0
-//     } else {
-//         -half_b - discriminant.sqrt() / a
-//     }
-// }
-
-fn ray_color(ray: &Ray, world: &HittableList) -> Pixel {
+fn ray_color(ray: &Ray, world: &HittableList, depth: usize) -> Pixel {
     let mut hit_record = HitRecord::default();
+    if depth <= 0 {
+        return Pixel::new(0.0, 0.0, 0.0);
+    }
     if world.hit(ray, 0.0, f64::INFINITY, &mut hit_record) {
-        return (Pixel::new(1.0, 1.0, 1.0) + hit_record.normal) * 0.5;
+        let target = hit_record.point + hit_record.normal + Point::random_in_unit_sphere();
+        return (ray_color(
+            &Ray {
+                origin: hit_record.point,
+                direction: target - hit_record.point,
+            },
+            &world,
+            depth - 1,
+        )) * 0.5;
     }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -64,9 +62,10 @@ fn ray_color(ray: &Ray, world: &HittableList) -> Pixel {
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
-    let width = 1920;
+    let width = 800;
     let height = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 50;
+    let samples_per_pixel = 1000;
+    let max_depth = 50;
 
     // World
     let mut world = HittableList::default();
@@ -84,6 +83,7 @@ fn main() {
         .enumerate()
         .for_each(|pixel_row| {
             let row_index = pixel_row.0;
+            dbg!(&row_index);
             let mut rng = rand::thread_rng();
             for (column_index, pixel) in pixel_row.1.iter_mut().enumerate() {
                 for _sample in 0..=samples_per_pixel {
@@ -97,7 +97,7 @@ fn main() {
                             + (camera.vertical * v)
                             - camera.origin,
                     };
-                    *pixel += ray_color(&ray, &world);
+                    *pixel += ray_color(&ray, &world, max_depth);
                 }
                 *pixel *= 1.0 / samples_per_pixel as f64;
             }
@@ -107,8 +107,10 @@ fn main() {
     window.set_image(&image, "image-001").unwrap();
 
     while let Ok(event) = window.wait_key(Duration::from_millis(1000)) {
-        if let Some(_event) = event {
-            break;
+        if let Some(event) = event {
+            if event.key == KeyCode::Escape {
+                break;
+            }
         }
     }
 
