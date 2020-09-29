@@ -25,12 +25,11 @@ impl Point {
     }
 
     pub fn random_in_unit_sphere() -> Self {
-        loop {
-            let p = Self::random(-1.0, 1.0);
-            if p.length_squared() < 1.0 {
-                return p;
-            }
-        }
+        let mut rng = rand::thread_rng();
+        let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
+        let z: f64 = rng.gen_range(-1.0, 1.0);
+        let r = (1.0 - z*z).sqrt();
+        Point::new(r*a.cos(), r*a.sin(), z)
     }
 
     pub fn x(&self) -> f64 {

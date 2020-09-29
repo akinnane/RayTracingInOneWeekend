@@ -36,7 +36,7 @@ impl Pixel {
 
     fn x_u8(x: f64) -> u8 {
         const LESS_THAN_ONE: f64 = 1.0 - f64::MIN;
-        (255.999 * x.clamp(0.0, LESS_THAN_ONE)) as u8
+        (255.999 * x.sqrt().clamp(0.0, LESS_THAN_ONE)) as u8
     }
 }
 

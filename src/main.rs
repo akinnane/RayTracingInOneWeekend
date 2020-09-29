@@ -34,7 +34,7 @@ fn ray_color(ray: &Ray, world: &HittableList, depth: usize) -> Pixel {
     if depth <= 0 {
         return Pixel::new(0.0, 0.0, 0.0);
     }
-    if world.hit(ray, 0.0, f64::INFINITY, &mut hit_record) {
+    if world.hit(ray, 0.001, f64::INFINITY, &mut hit_record) {
         let target = hit_record.point + hit_record.normal + Point::random_in_unit_sphere();
         return (ray_color(
             &Ray {
@@ -64,8 +64,8 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let width = 800;
     let height = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 1000;
-    let max_depth = 50;
+    let samples_per_pixel = 50;
+    let max_depth = 25;
 
     // World
     let mut world = HittableList::default();
