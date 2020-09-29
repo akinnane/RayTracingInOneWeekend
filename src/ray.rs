@@ -1,12 +1,15 @@
 use crate::point::Point;
 
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Point,
 }
 
 impl Ray {
+    pub fn new(origin: Point, direction: Point) -> Self {
+        Self { origin, direction }
+    }
     // pub fn origin(&self) -> Point {
     //     self.origin
     // }

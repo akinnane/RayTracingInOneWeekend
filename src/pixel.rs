@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::point::Point;
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, Copy)]
 pub struct Pixel {
     pub r: f64,
     pub g: f64,
@@ -48,6 +48,18 @@ impl Mul<f64> for Pixel {
             r: self.r * t,
             g: self.g * t,
             b: self.b * t,
+        }
+    }
+}
+
+impl Mul<Pixel> for Pixel {
+    type Output = Self;
+
+    fn mul(self, rhs: Pixel) -> Self {
+        Pixel {
+            r: self.r * rhs.r,
+            g: self.g * rhs.g,
+            b: self.b * rhs.b,
         }
     }
 }

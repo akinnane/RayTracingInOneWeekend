@@ -1,4 +1,3 @@
-use rand::thread_rng;
 use rand::Rng;
 use std::fmt;
 
@@ -24,12 +23,21 @@ impl Point {
         }
     }
 
-    pub fn random_in_unit_sphere() -> Self {
+    pub fn random_unit_vector() -> Self {
         let mut rng = rand::thread_rng();
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
-        let r = (1.0 - z*z).sqrt();
-        Point::new(r*a.cos(), r*a.sin(), z)
+        let r = (1.0 - z * z).sqrt();
+        Point::new(r * a.cos(), r * a.sin(), z)
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
     }
 
     pub fn x(&self) -> f64 {
@@ -56,6 +64,14 @@ impl Point {
 
     pub fn dot(&self, other: &Point) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    // pub fn reflect(v: &Point, n: &Point) -> Point {
+    //     *v - *n * v.dot(n) * 2.0
+    // }
+
+    pub fn reflect(self, n: &Point) -> Point {
+        self - *n * self.dot(n) * 2.0
     }
 }
 

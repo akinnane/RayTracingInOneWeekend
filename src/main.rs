@@ -25,6 +25,9 @@ use crate::sphere::Sphere;
 mod camera;
 use crate::camera::Camera;
 
+mod material;
+use crate::material::Material;
+
 use rand::Rng;
 use rayon::prelude::*;
 use show_image::{make_window, KeyCode};
@@ -35,15 +38,18 @@ fn ray_color(ray: &Ray, world: &HittableList, depth: usize) -> Pixel {
         return Pixel::new(0.0, 0.0, 0.0);
     }
     if world.hit(ray, 0.001, f64::INFINITY, &mut hit_record) {
-        let target = hit_record.point + hit_record.normal + Point::random_in_unit_sphere();
-        return (ray_color(
-            &Ray {
-                origin: hit_record.point,
-                direction: target - hit_record.point,
-            },
-            &world,
-            depth - 1,
-        )) * 0.5;
+        let mut scattered = Ray::default();
+        let mut attenuation = Pixel::default();
+        if hit_record
+            .material
+            .scatter(ray, &hit_record, &mut attenuation, &mut scattered)
+        {
+            //dbg!(&scattered);
+            let out = ray_color(&scattered, world, depth - 1) * attenuation;
+
+            return out;
+        }
+        return Pixel::new(0.0, 0.0, 0.0);
     }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -62,16 +68,49 @@ fn ray_color(ray: &Ray, world: &HittableList, depth: usize) -> Pixel {
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
-    let width = 800;
+    //let width = 800;
+    let width = 3840;
     let height = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 50;
-    let max_depth = 25;
+    let samples_per_pixel = 200;
+    let max_depth = 100;
 
     // World
     let mut world = HittableList::default();
-    world.add(Box::new(Sphere::new(Point::new(-0.6, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::new(Point::new(0.5, 0.0, -0.8), 0.4)));
-    world.add(Box::new(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0)));
+
+    world.add(Box::new(Sphere::new(
+        Point::new(0.0, -100.5, -1.0),
+        100.0,
+        Box::new(Material::Lambertian {
+            albedo: Pixel::new(0.8, 0.8, 0.0),
+        }),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Point::new(0.0, 0.0, -1.0),
+        0.5,
+        Box::new(Material::Lambertian {
+            albedo: Pixel::new(0.7, 0.3, 0.3),
+        }),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Point::new(-1.0, 0.0, -1.0),
+        0.5,
+        Box::new(Material::Metal {
+            albedo: Pixel::new(0.8, 0.8, 0.8),
+        }),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Point::new(1.0, 0.0, -1.0),
+        0.5,
+        Box::new(Material::Metal {
+            albedo: Pixel::new(0.8, 0.6, 0.2),
+        }),
+    )));
+
+    //world.add(Box::new(Sphere::new(Point::new(0.5, 0.0, -0.8), 0.4)));
+    //world.add(Box::new(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0)));
 
     let camera = Camera::new();
 
@@ -103,7 +142,7 @@ fn main() {
             }
         });
 
-    let window = make_window("image").unwrap();
+    let window = make_window("ray_tracing_in_one_weekend").unwrap();
     window.set_image(&image, "image-001").unwrap();
 
     while let Ok(event) = window.wait_key(Duration::from_millis(1000)) {

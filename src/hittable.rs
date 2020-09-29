@@ -1,3 +1,4 @@
+use crate::material::Material;
 use crate::point::Point;
 use crate::ray::Ray;
 
@@ -7,6 +8,7 @@ pub struct HitRecord {
     pub normal: Point,
     pub t: f64,
     front_face: bool,
+    pub material: Box<Material>,
 }
 
 impl HitRecord {
