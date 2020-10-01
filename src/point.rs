@@ -73,6 +73,13 @@ impl Point {
     pub fn reflect(self, n: &Point) -> Point {
         self - *n * self.dot(n) * 2.0
     }
+
+    pub fn refract(&self, n: &Point, etai_over_etat: f64) -> Point {
+        let cos_theta = (-*self).dot(n);
+        let r_out_perp = (self + &(n * cos_theta)) * etai_over_etat;
+        let r_out_parallel = n * -(((1.0 - r_out_perp.length_squared()).abs()).sqrt());
+        r_out_perp + r_out_parallel
+    }
 }
 
 impl Div<f64> for Point {
@@ -94,6 +101,29 @@ impl Mul<f64> for Point {
     }
 }
 
+impl Mul<f64> for &Point {
+    type Output = Point;
+
+    fn mul(self, t: f64) -> Point {
+        Point {
+            x: self.x * t,
+            y: self.y * t,
+            z: self.z * t,
+        }
+    }
+}
+
+impl Mul for Point {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self {
+        Point {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
 impl Add for Point {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
@@ -104,7 +134,31 @@ impl Add for Point {
         }
     }
 }
+
+impl Add for &Point {
+    type Output = Point;
+    fn add(self, rhs: Self) -> Point {
+        Point {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
 impl Neg for Point {
+    type Output = Point;
+
+    fn neg(self) -> Point {
+        Point {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+}
+
+impl Neg for &Point {
     type Output = Point;
 
     fn neg(self) -> Point {

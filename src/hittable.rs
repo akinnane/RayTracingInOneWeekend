@@ -7,7 +7,7 @@ pub struct HitRecord {
     pub point: Point,
     pub normal: Point,
     pub t: f64,
-    front_face: bool,
+    pub front_face: bool,
     pub material: Box<Material>,
 }
 
