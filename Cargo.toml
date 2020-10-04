@@ -9,5 +9,5 @@ edition = "2018"
 [dependencies]
 rand = "*"
 rayon = "*"
-show-image = "*"
+show-image = {version = "*", features =  ["save"]}
 pbr = "*"

@@ -1,4 +1,5 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+use rand::Rng;
 
 #[derive(Default, Clone, Debug, Copy)]
 pub struct Pixel {
@@ -10,6 +11,23 @@ pub struct Pixel {
 impl Pixel {
     pub fn new(r: f64, g: f64, b: f64) -> Self {
         Self { r, g, b }
+    }
+    pub fn random() -> Self {
+        let mut rng = rand::thread_rng();
+        Self {
+            r: rng.gen_range(0.0, 1.0),
+            g: rng.gen_range(0.0, 1.0),
+            b: rng.gen_range(0.0, 1.0),
+        }
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Self {
+        let mut rng = rand::thread_rng();
+        Self {
+            r: rng.gen_range(min, max),
+            g: rng.gen_range(min, max),
+            b: rng.gen_range(min, max),
+        }
     }
 }
 
