@@ -2,6 +2,7 @@ use crate::hittable::HitRecord;
 use crate::pixel::Pixel;
 use crate::point::Point;
 use crate::ray::Ray;
+use rand::Rng;
 
 #[derive(Clone, Copy)]
 pub enum Material {
@@ -77,14 +78,33 @@ impl Material {
         scattered: &mut Ray,
     ) -> bool {
         *attenuation = Pixel::new(1.0, 1.0, 1.0);
-        let etai_over_etat = if hit_record.front_face {
+        let refraction_ratio = if hit_record.front_face {
             1.0 / ref_idx
         } else {
             ref_idx
         };
         let unit_direction = ray_in.direction.unit_vector();
-        let refracted = unit_direction.refract(&hit_record.normal, etai_over_etat);
-        *scattered = Ray::new(hit_record.point, refracted);
+
+        let cos_theta = -unit_direction.dot(&hit_record.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+        let mut rng = rand::thread_rng();
+        let direction = if cannot_refract || Material::reflectance(cos_theta, refraction_ratio) > rng.gen_range(0.0, 1.0) {
+            unit_direction.reflect(&hit_record.normal)
+        } else {
+            unit_direction.refract(&hit_record.normal, refraction_ratio)
+        };
+
+        *scattered = Ray::new(hit_record.point, direction);
         true
+    }
+
+    fn reflectance(cosine:f64, ref_idx:f64) -> f64{
+        // Use Schlick's approximation for reflectance.
+        let mut r0 = (1.0-ref_idx) / (1.0+ref_idx);
+        r0 *= r0;
+        r0 + (1.0-r0) * (1.0 - cosine).powi(5)
     }
 }

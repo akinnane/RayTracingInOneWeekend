@@ -75,14 +75,15 @@ fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     //let width = 800;
-    let width = 800;
+    let width = 1000;
     let height = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 30;
-    let max_depth = 30;
+    let samples_per_pixel = 300;
+    let max_depth = 300;
 
     // World
     let mut world = HittableList::default();
 
+    // Ground
     world.add(Box::new(Sphere::new(
         Point::new(0.0, -100.5, -1.0),
         100.0,
@@ -91,12 +92,14 @@ fn main() {
         }),
     )));
 
+    // Centre
     world.add(Box::new(Sphere::new(
         Point::new(0.0, 0.0, -1.0),
         0.5,
-        Box::new(Material::Dielectric { ref_idx: 1.5 }),
+        Box::new(Material::Lambertian { albedo: Pixel::new(0.1, 0.2, 0.5) }),
     )));
 
+    // Left
     world.add(Box::new(Sphere::new(
         Point::new(-1.0, 0.0, -1.0),
         0.5,
@@ -104,11 +107,18 @@ fn main() {
     )));
 
     world.add(Box::new(Sphere::new(
+        Point::new(-1.0, 0.0, -1.0),
+        -0.4,
+        Box::new(Material::Dielectric { ref_idx: 1.5 }),
+    )));
+
+    // Right
+    world.add(Box::new(Sphere::new(
         Point::new(1.0, 0.0, -1.0),
         0.5,
         Box::new(Material::Metal {
             albedo: Pixel::new(0.8, 0.6, 0.2),
-            fuzz: 1.0,
+            fuzz: 0.0,
         }),
     )));
 
