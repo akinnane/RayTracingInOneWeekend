@@ -124,12 +124,20 @@ fn main() {
         }),
     )));
 
+    let lookfrom = Point::new(3.0, 3.0, 2.0);
+    let lookat = Point::new(0.0, 0.0, -1.0);
+    let vup = Point::new(0.0,1.0,0.0);
+    let dist_to_focus = (lookfrom-lookat).length();
+    let aperture = 2.0;
+
     let camera = Camera::new(
-        Point::new(-2.0, 2.0, 1.0),
-        Point::new(0.0, 0.0, -1.0),
-        Point::new(0.0, 1.0, 0.0),
+        lookfrom,
+        lookat,
+        vup,
         20.0,
         aspect_ratio,
+        aperture,
+        dist_to_focus,
     );
 
     let mut image = PPM::new(width, height);
@@ -151,13 +159,7 @@ fn main() {
 
                     let v = (row_index as f64 + rng.gen_range(0.0, 1.0)) / (height - 1) as f64;
 
-                    let direction =
-                        camera.lower_left_corner + (camera.horizontal * u) + (camera.vertical * v)
-                            - camera.origin;
-                    let ray = Ray {
-                        origin: camera.origin,
-                        direction,
-                    };
+                    let ray = camera.get_ray(u,v);
                     p += ray_color(&ray, &world, max_depth);
                 }
                 p *= 1.0 / samples_per_pixel as f64;
