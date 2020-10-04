@@ -94,7 +94,7 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Point::new(0.0, 0.0, -1.0),
         0.5,
-        Box::new(Material::Dielectric { ref_idx: 1.1 }),
+        Box::new(Material::Dielectric { ref_idx: 1.5 }),
     )));
 
     world.add(Box::new(Sphere::new(

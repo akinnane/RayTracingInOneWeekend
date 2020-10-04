@@ -13,8 +13,8 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Point) {
-        let front_face = ray.direction.dot(&outward_normal) < 0.0;
-        self.normal = if front_face {
+        self.front_face = ray.direction.dot(&outward_normal) < 0.0;
+        self.normal = if self.front_face {
             outward_normal
         } else {
             -outward_normal
