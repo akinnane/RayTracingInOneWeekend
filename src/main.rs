@@ -33,7 +33,7 @@ use rand::Rng;
 use rayon::prelude::*;
 use show_image::{make_window, KeyCode};
 
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{channel};
 use std::thread;
 
 use pbr::ProgressBar;
@@ -75,10 +75,10 @@ fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     //let width = 800;
-    let width = 4000;
+    let width = 800;
     let height = (width as f64 / aspect_ratio) as usize;
-    let samples_per_pixel = 500;
-    let max_depth = 100;
+    let samples_per_pixel = 30;
+    let max_depth = 30;
 
     // World
     let mut world = HittableList::default();
@@ -127,6 +127,7 @@ fn main() {
         .enumerate()
         .for_each_with(sender, |s, pixel_row| {
             let row_index = pixel_row.0;
+
             let mut rng = rand::thread_rng();
             for (column_index, pixel) in pixel_row.1.chunks_mut(3).enumerate() {
                 let mut p = PixelSlice { s: pixel };
@@ -146,48 +147,54 @@ fn main() {
                 }
                 p *= 1.0 / samples_per_pixel as f64;
             }
+
             s.send((row_index, pixel_row.1.to_vec())).unwrap();
         });
 
     println!("Finished Rendering");
+
     shutdown_receiver.recv().unwrap();
     handle.join().unwrap()
 }
 
 type RowData = (usize, Vec<f64>);
 
-fn image_thread(
-    mut image: PPM,
-) -> (
-    thread::JoinHandle<()>,
-    Sender<RowData>,
-    Receiver<usize>,
-) {
+fn image_thread(mut image: PPM) -> (thread::JoinHandle<()>, Sender<RowData>, Receiver<usize>) {
     let (sender, receiver): (Sender<RowData>, Receiver<RowData>) = channel();
     let (shutdown_sender, shutdown_reciever) = channel();
     let handle = thread::spawn(move || {
         let window = make_window("ray_tracing_in_one_weekend").unwrap();
         let mut pb = ProgressBar::new(image.height as u64);
         pb.format("╢▌▌░╟");
-        let mut n = 0;
-        loop {
-            n += 1;
-            if let Ok(inner) = receiver.recv() {
-                let row_start: usize =
-                    ((image.height * image.width) - (inner.0 + 1) * image.width) * 3;
-                let row_end: usize = ((image.height * image.width) - (inner.0) * image.width) * 3;
+        let mut update = true;
 
-                image
-                    .pixels
-                    .splice(row_start..row_end, inner.1.iter().cloned());
-                if n % 10 == 0 {
-                    window.set_image(&image.clone(), "image-001").unwrap();
+        loop {
+            match receiver.try_recv() {
+                Ok(inner) => {
+                    let row_start: usize =
+                        ((image.height * image.width) - (inner.0 + 1) * image.width) * 3;
+                    let row_end: usize =
+                        ((image.height * image.width) - (inner.0) * image.width) * 3;
+
+                    image
+                        .pixels
+                        .splice(row_start..row_end, inner.1);
+                    pb.inc();
+                    update = true;
                 }
-                pb.inc();
-            } else {
-                break;
+                Err(std::sync::mpsc::TryRecvError::Empty) => {
+                    if update {
+                        window.set_image(&image, "image-001").unwrap();
+                        update = false
+                    }
+                }
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                    window.set_image(image, "image-001").unwrap();
+                    break;
+                }
             }
         }
+
         pb.finish_print("Finished Displaying Image");
         while let Ok(event) = window.wait_key(Duration::from_millis(1000)) {
             if let Some(event) = event {
