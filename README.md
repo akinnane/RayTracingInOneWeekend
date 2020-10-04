@@ -1,6 +1,6 @@
 # Ray tracing in one weekend
 
-![Final Scene](https://github.com/akinnane/RayTracingInOneWeekend/final_scene.png)
+![Final Scene](https://github.com/akinnane/RayTracingInOneWeekend/raw/master/final_scene.png)
 
 
 See https://raytracing.github.io/books/RayTracingInOneWeekend.html
