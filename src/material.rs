@@ -48,7 +48,7 @@ impl Material {
     ) -> bool {
         let scatter_direction = hit_record.normal + Point::random_unit_vector();
         *scattered = Ray::new(hit_record.point, scatter_direction);
-        *attenuation = albedo.clone();
+        *attenuation = *albedo;
         true
     }
 
@@ -65,7 +65,7 @@ impl Material {
             hit_record.point,
             reflected + Point::random_in_unit_sphere() * fuzz,
         );
-        *attenuation = albedo.clone();
+        *attenuation = *albedo;
         scattered.direction.dot(&hit_record.normal) > 0.0
     }
 
