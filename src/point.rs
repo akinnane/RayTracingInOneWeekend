@@ -80,6 +80,14 @@ impl Point {
         let r_out_parallel = n * -(((1.0 - r_out_perp.length_squared()).abs()).sqrt());
         r_out_perp + r_out_parallel
     }
+
+    pub fn cross(&self, v: &Point) -> Point {
+        Point {
+            x: self.y * v.z - self.z * v.y,
+            y: self.z * v.x - self.x * v.z,
+            z: self.x * v.y - self.y * v.x,
+        }
+    }
 }
 
 impl Div<f64> for Point {

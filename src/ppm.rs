@@ -32,7 +32,6 @@ impl ImageData for &PPM {
     }
 }
 
-
 impl ImageData for PPM {
     fn info(&self) -> Result<ImageInfo, String> {
         Ok(ImageInfo::rgb8(self.width, self.height))

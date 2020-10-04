@@ -33,7 +33,7 @@ use rand::Rng;
 use rayon::prelude::*;
 use show_image::{make_window, KeyCode};
 
-use std::sync::mpsc::{channel};
+use std::sync::mpsc::channel;
 use std::thread;
 
 use pbr::ProgressBar;
@@ -96,7 +96,9 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Point::new(0.0, 0.0, -1.0),
         0.5,
-        Box::new(Material::Lambertian { albedo: Pixel::new(0.1, 0.2, 0.5) }),
+        Box::new(Material::Lambertian {
+            albedo: Pixel::new(0.1, 0.2, 0.5),
+        }),
     )));
 
     // Left
@@ -122,10 +124,13 @@ fn main() {
         }),
     )));
 
-    //world.add(Box::new(Sphere::new(Point::new(0.5, 0.0, -0.8), 0.4)));
-    //world.add(Box::new(Sphere::new(Point::new(0.0, -100.5, -1.0), 100.0)));
-
-    let camera = Camera::new();
+    let camera = Camera::new(
+        Point::new(-2.0, 2.0, 1.0),
+        Point::new(0.0, 0.0, -1.0),
+        Point::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio,
+    );
 
     let mut image = PPM::new(width, height);
 
@@ -186,9 +191,7 @@ fn image_thread(mut image: PPM) -> (thread::JoinHandle<()>, Sender<RowData>, Rec
                     let row_end: usize =
                         ((image.height * image.width) - (inner.0) * image.width) * 3;
 
-                    image
-                        .pixels
-                        .splice(row_start..row_end, inner.1);
+                    image.pixels.splice(row_start..row_end, inner.1);
                     pb.inc();
                     update = true;
                 }

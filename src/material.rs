@@ -91,7 +91,9 @@ impl Material {
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
 
         let mut rng = rand::thread_rng();
-        let direction = if cannot_refract || Material::reflectance(cos_theta, refraction_ratio) > rng.gen_range(0.0, 1.0) {
+        let direction = if cannot_refract
+            || Material::reflectance(cos_theta, refraction_ratio) > rng.gen_range(0.0, 1.0)
+        {
             unit_direction.reflect(&hit_record.normal)
         } else {
             unit_direction.refract(&hit_record.normal, refraction_ratio)
@@ -101,10 +103,10 @@ impl Material {
         true
     }
 
-    fn reflectance(cosine:f64, ref_idx:f64) -> f64{
+    fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
         // Use Schlick's approximation for reflectance.
-        let mut r0 = (1.0-ref_idx) / (1.0+ref_idx);
+        let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
         r0 *= r0;
-        r0 + (1.0-r0) * (1.0 - cosine).powi(5)
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
     }
 }
